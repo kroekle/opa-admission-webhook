@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: untrusted
+  namespace: default
+  name: untrusted
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: untrusted
+  template:
+    metadata:
+      labels:
+        app: untrusted
+      name: untrusted
+    spec:
+      containers:
+        - name: untrusted
+          image: untrusted/image:v1

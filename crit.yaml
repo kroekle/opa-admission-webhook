@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: crit
+  namespace: default
+  name: crit
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: crit
+  template:
+    metadata:
+      labels:
+        app: crit
+      name: crit
+    spec:
+      containers:
+        - name: crit
+          image: trusted/api:v1

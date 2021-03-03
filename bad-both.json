@@ -1,0 +1,26 @@
+{
+    "input": {
+        "request": {
+            "uid": "zzz",
+            "kind": {
+                "kind": "Deployment"
+            },
+            "object": {
+                "spec": {
+                    "template": {
+                        "spec": {
+                            "containers": [
+                                {
+                                    "image": "untrusted/api:v2"
+                                },
+                                {
+                                    "image": "trusted/api:v1"
+                                }
+                            ]
+                        }
+                    }
+                }
+            } 
+        }
+    }
+}

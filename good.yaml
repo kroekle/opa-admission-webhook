@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: good
+  namespace: default
+  name: good
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: good
+  template:
+    metadata:
+      labels:
+        app: good
+      name: good
+    spec:
+      containers:
+        - name: good
+          image: trusted/api:v2
