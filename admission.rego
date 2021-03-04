@@ -1,5 +1,7 @@
 package system
 
+import data.vuln.attributes as vuln
+
 main = {
     "apiVersion": "admission.k8s.io/v1",
     "kind": "AdmissionReview",
@@ -24,9 +26,11 @@ else = {"allowed": true, "uid": uid}
 
 deny[msg] {
     input.request.kind.kind == "Deployment"
-    image := input.request.object.spec.template.spec.containers[_].image
-    image == "trusted/api:v1"
-    msg := sprintf("Image '%s' has more than 0 critical vulnerabilities (%d)", [image, 7])
+    some image
+      image = input.request.object.spec.template.spec.containers[_].image
+      crits := vuln[image].crit
+      crits > 0
+      msg := sprintf("Image '%s' has more than 0 critical vulnerabilities (%d)", [image, crits])
 }
 
 deny[msg] {

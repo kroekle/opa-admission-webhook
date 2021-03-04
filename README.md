@@ -205,7 +205,48 @@ At this point we should have a healthy OPA that we can apply some polices to.  O
 The policy below will just add a couple of simple rules.  I've included this in one file for ease of reading, but you would normally separate the deny rules into their own package and import them.
 
 ```
-<admission.rego>
+package system
+
+import data.vuln.attributes as vuln
+
+main = {
+    "apiVersion": "admission.k8s.io/v1",
+    "kind": "AdmissionReview",
+    "response": response,
+}
+
+default uid = ""
+
+uid = input.request.uid
+
+response = {
+    "allowed": false,
+    "uid": uid,
+    "status": {
+        "reason": reason,
+    },
+} {
+    reason = concat(", ", deny)
+    reason != ""
+}
+else = {"allowed": true, "uid": uid}
+
+deny[msg] {
+    input.request.kind.kind == "Deployment"
+    some image
+      image = input.request.object.spec.template.spec.containers[_].image
+      crits := vuln[image].crit
+      crits > 0
+      msg := sprintf("Image '%s' has more than 0 critical vulnerabilities (%d)", [image, crits])
+}
+
+deny[msg] {
+    input.request.kind.kind == "Deployment"
+    containers := input.request.object.spec.template.spec.containers[_]
+    not startswith(containers.image, "trusted/")
+    msg := sprintf("Image '%s' is not from a trusted repo", [containers.image])
+}
+
 ```
 
 Use the put method when writing policies.  "Admission" is just a path to the policy, you can go deeper paths if you like and make it whatever you like.
@@ -214,7 +255,30 @@ Use the put method when writing policies.  "Admission" is just a path to the pol
 curl -X PUT -T admission.rego --insecure -H 'Content-Type: text/plain' https://localhost:9999/v1/policies/admission
 ```
 
-TODO: add data load
+Our crit rule utilizes some data to determine if an image has vulnerabilities.  The data looks like this:
+
+```
+{
+    "trusted/api:v1": {
+        "crit": 10,
+        "high": 8,
+        "med": 14,
+        "low":26
+    },
+    "trusted/api:v2": {
+        "crit": 0,
+        "high": 3,
+        "med": 18,
+        "low":26
+    }
+}
+```
+
+Let's put that into OPA using the data api:
+
+```
+curl -X PUT -T vuln.json --insecure -H 'Content-Type: application/json' https://localhost:9999/v1/data/vuln/attributes
+```
 
 You can now test the document by using some example inputs. (these are not full AdmissionReview documents, but just the necessities to get a decision)
 

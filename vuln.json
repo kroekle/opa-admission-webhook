@@ -1,0 +1,14 @@
+{
+    "trusted/api:v1": {
+        "crit": 10,
+        "high": 8,
+        "med": 14,
+        "low":26
+    },
+    "trusted/api:v2": {
+        "crit": 0,
+        "high": 3,
+        "med": 18,
+        "low":26
+    }
+}
